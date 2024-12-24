@@ -6,6 +6,9 @@ constexpr int CELL_SIZE = 120; // セルの大きさ
 // 盤面の状態
 Array<Array<int>> board(GRID_SIZE, Array<int>(GRID_SIZE, 0));
 
+// ゲームオーバー状態
+bool gameOver = false;
+
 // ランダムな位置にタイルを追加
 void addRandomTile()
 {
@@ -27,10 +30,40 @@ void addRandomTile()
 	board[y][x] = (RandomBool(0.9) ? 2 : 4); // 90% で 2, 10% で 4
 }
 
+// ゲームオーバーの判定
+bool isGameOver()
+{
+	// 空きセルがあればゲームオーバーではない
+	for (int y = 0; y < GRID_SIZE; ++y)
+	{
+		for (int x = 0; x < GRID_SIZE; ++x)
+		{
+			if (board[y][x] == 0)
+			{
+				return false;
+			}
+		}
+	}
+
+	// 隣接するタイルに同じ値があればゲームオーバーではない
+	for (int y = 0; y < GRID_SIZE; ++y)
+	{
+		for (int x = 0; x < GRID_SIZE; ++x)
+		{
+			if (x < GRID_SIZE - 1 && board[y][x] == board[y][x + 1]) return false; // 右隣
+			if (y < GRID_SIZE - 1 && board[y][x] == board[y + 1][x]) return false; // 下隣
+		}
+	}
+
+	// 上記の条件を満たさない場合はゲームオーバー
+	return true;
+}
+
 // ゲーム初期化
 void initGame()
 {
 	board.assign(GRID_SIZE, Array<int>(GRID_SIZE, 0));
+	gameOver = false; // ゲームオーバー状態をリセット
 	for (int i = 0; i < 2; ++i) // 初期にランダムな2つのタイルを追加
 	{
 		addRandomTile();
@@ -219,22 +252,20 @@ void Main()
 
 	while (System::Update())
 	{
-		// 入力処理
-		bool moved = false;
-		if (KeyLeft.down()) moved = slideLeft();
-		if (KeyRight.down()) moved = slideRight();
-		if (KeyUp.down()) moved = slideUp();
-		if (KeyDown.down()) moved = slideDown();
-
-		// ボタンがクリックされたらゲームを初期化
-		if (newGameButton.leftClicked())
+		// 入力処理（ゲームオーバー時は入力を受け付けない）
+		if (!gameOver)
 		{
-			initGame();
-		}
+			bool moved = false;
+			if (KeyLeft.down()) moved = slideLeft();
+			if (KeyRight.down()) moved = slideRight();
+			if (KeyUp.down()) moved = slideUp();
+			if (KeyDown.down()) moved = slideDown();
 
-		if (moved)
-		{
-			addRandomTile(); // 動きがあった場合のみ新しいタイルを追加
+			if (moved)
+			{
+				addRandomTile(); // 動きがあった場合のみ新しいタイルを追加
+				gameOver = isGameOver(); // ゲームオーバー状態を確認
+			}
 		}
 
 		// 盤面描画
@@ -250,6 +281,17 @@ void Main()
 					FontAsset(U"GameFont")(board[y][x]).drawAt(rect.center(), Palette::Black);
 				}
 			}
+		}
+
+		if (newGameButton.leftClicked())
+		{
+			initGame();
+		}
+
+		// ゲームオーバー時の描画
+		if (gameOver)
+		{
+			FontAsset(U"GameFont")(U"Game Over").drawAt(Scene::Center(), Palette::Red);
 		}
 
 		// ボタンの描画
