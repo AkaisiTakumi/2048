@@ -2,6 +2,7 @@
 
 constexpr int GRID_SIZE = 4; // グリッドのサイズ（4x4）
 constexpr int CELL_SIZE = 120; // セルの大きさ
+constexpr int SNOW_SPEED_MIN = 1, SNOW_SPEED_MAX=2; // 雪の速度
 
 // 盤面の状態
 Array<Array<int>> board(GRID_SIZE, Array<int>(GRID_SIZE, 0));
@@ -217,6 +218,9 @@ void Main()
 
 	const Rect newGameButton(500, 20, 100, 50); // 「新しいゲームを始める」ボタンの座標とサイズ
 
+	Array<Vec2> snowflakes;
+	Array<double> snowspeed;
+
 	while (System::Update())
 	{
 		// 入力処理
@@ -242,7 +246,7 @@ void Main()
 		{
 			for (int x = 0; x < GRID_SIZE; ++x)
 			{
-				Rect rect(x * CELL_SIZE+20, y * CELL_SIZE+100, CELL_SIZE - 5);
+				Rect rect(x * CELL_SIZE + 20, y * CELL_SIZE + 100, CELL_SIZE - 5);
 				rect.rounded(10).draw(Palette::Orange);
 				if (board[y][x] > 0)
 				{
@@ -251,6 +255,23 @@ void Main()
 				}
 			}
 		}
+
+		// 雪を追加
+		if (snowflakes.size() < 100 && RandomBool(0.05))
+		{
+			snowflakes.push_back(Vec2(Random(Scene::Width()), 0));
+			snowspeed.push_back(Random(SNOW_SPEED_MIN, SNOW_SPEED_MAX));
+		}
+
+		// 雪を描画
+		for (int i=0;i< snowflakes.size();++i)
+		{
+			snowflakes.at(i).y += snowspeed.at(i);
+			Circle(snowflakes.at(i), 5).draw(Palette::White);
+		}
+
+		// 画面外の雪を削除
+		Erase_if(snowflakes, [](const Vec2& snowflake) { return snowflake.y > Scene::Height(); });
 
 		// ボタンの描画
 		newGameButton.draw(ColorF(0.6, 0.8, 0.95)).drawFrame(2, 0, Palette::Black);
