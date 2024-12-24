@@ -231,7 +231,7 @@ void Main()
 		{
 			for (int x = 0; x < GRID_SIZE; ++x)
 			{
-				Rect rect((x + 0.5) * CELL_SIZE, (y + 0.5) * CELL_SIZE, CELL_SIZE - 5);
+				Rect rect(x * CELL_SIZE+20, y * CELL_SIZE+100, CELL_SIZE - 5);
 				rect.rounded(10).draw(Palette::Orange);
 				if (board[y][x] > 0)
 				{
