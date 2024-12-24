@@ -226,6 +226,12 @@ void Main()
 		if (KeyUp.down()) moved = slideUp();
 		if (KeyDown.down()) moved = slideDown();
 
+		// ボタンがクリックされたらゲームを初期化
+		if (newGameButton.leftClicked())
+		{
+			initGame();
+		}
+
 		if (moved)
 		{
 			addRandomTile(); // 動きがあった場合のみ新しいタイルを追加
