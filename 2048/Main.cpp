@@ -210,7 +210,12 @@ void Main()
 {
 	Scene::SetBackground(ColorF(0.95));
 	FontAsset::Register(U"GameFont", 40, Typeface::Bold);
+
+	FontAsset::Register(U"ButtonFont", 30, Typeface::Regular);
+
 	initGame();
+
+	const Rect newGameButton(500, 20, 100, 50); // 「新しいゲームを始める」ボタンの座標とサイズ
 
 	while (System::Update())
 	{
@@ -240,5 +245,9 @@ void Main()
 				}
 			}
 		}
+
+		// ボタンの描画
+		newGameButton.draw(ColorF(0.6, 0.8, 0.95)).drawFrame(2, 0, Palette::Black);
+		FontAsset(U"ButtonFont")(U"new").drawAt(newGameButton.center(), Palette::Black);
 	}
 }
